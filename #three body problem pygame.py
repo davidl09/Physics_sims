@@ -5,8 +5,8 @@ import numpy as np
 import random
 
 #global variables
-screen_width = 1000
-screen_height = 800
+screen_width = 1200
+screen_height = 950
 
 density = 100
 last_time = 0
@@ -14,7 +14,8 @@ balls = []
 times = []
 
 class Object:
-    def __init__(self, radius, density, position, velocity):
+    def __init__(self, radius, density, position, velocity, is_stationary):
+        self.is_stationary = is_stationary
         self.deleted = False
         self.radius = radius
         self.density = density
@@ -56,6 +57,7 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 last_time = pygame.time.get_ticks()
 
+#balls.append(Object(15, 1000, np.array([[500, 400]]), np.array([[0, 0]]), True))
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -63,10 +65,10 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
-                balls.append(Object(3, density, np.array([[mouse_pos[0], mouse_pos[1]]]), np.array([[random.randrange(-100, 100), random.randrange(-100, 100)]])))
+                balls.append(Object(3, density, np.array([[mouse_pos[0], mouse_pos[1]]]), np.array([[random.randrange(-100, 100), random.randrange(-100, 100)]]), False))
             if event.button == 3:
                 mouse_pos = pygame.mouse.get_pos()
-                balls.append(Object(9, density, np.array([[mouse_pos[0], mouse_pos[1]]]), np.array([[0, 0]])))
+                balls.append(Object(9, density, np.array([[mouse_pos[0], mouse_pos[1]]]), np.array([[0, 0]]), False))
 
     screen.fill((255, 255, 255))
     dt = previous_time()
@@ -98,6 +100,8 @@ while True:
             ball_pair[i].radius += pow(ball_pair[j].radius, 1/3)
             ball_pair[i].velocity = (ball_pair[i].velocity*ball_pair[i].mass+ball_pair[j].velocity*ball_pair[j].mass)/(ball_pair[i].mass + ball_pair[j].mass)
             ball_pair[i].mass += ball_pair[j].mass
+            ball_pair[i].density = ball_pair[i].mass/pow(ball_pair[i].radius, 3)
+            ball_pair[i].position = (ball_pair[i].position*ball_pair[i].mass+ball_pair[j].position*ball_pair[j].mass)/(ball_pair[i].mass+ball_pair[j].mass)
             ball_pair[j].delete()
 
             for i, ball_pair in enumerate(ball_pairs):
@@ -119,11 +123,12 @@ while True:
         ball_pair[1].force[0, 0] += force_x2
         ball_pair[1].force[0, 1] += force_y2
         
-
     for ball in balls:
         if not ball.deleted:
-            ball.draw()
-            ball.update()
+            if not ball.is_stationary:
+                ball.draw()
+                ball.update()
+            else: ball.draw()
         
         
     
