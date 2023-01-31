@@ -74,7 +74,7 @@ while True:
     dt = previous_time()
     
 
-    for ball in balls:
+    for ball in balls:  #remove a ball from the master list if it has been deleted and reset all forces on balls to 0
         if ball.deleted:
             ball.pop()
         ball.force[0, 0] = 0
@@ -84,11 +84,11 @@ while True:
     ball_pairs = []
     for i in range(len(balls)):
         for j in range(i+1, len(balls)):
-            ball_pairs.append((balls[i], balls[j]))
-    for ball_pair in ball_pairs:
-        distance = np.sqrt(np.power(ball_pair[0].position[0][0] - ball_pair[1].position[0][0], 2) + np.power(ball_pair[0].position[0][1] - ball_pair[1].position[0][1], 2))
+            ball_pairs.append((balls[i], balls[j]))  #make a list of all possible combinations of balls (Cartesian product)
+    for ball_pair in ball_pairs:  #get distance between all pairs
+        distance = np.sqrt(np.power(ball_pair[0].position[0][0] - ball_pair[1].position[0][0], 2) + np.power(ball_pair[0].position[0][1] - ball_pair[1].position[0][1], 2)) 
     
-        if distance <= ball_pair[0].radius + ball_pair[1].radius:
+        if distance <= ball_pair[0].radius + ball_pair[1].radius:  #handle ball collisions to conserve momentum, mass, volume, etc
             if ball_pair[0].mass > ball_pair[1].mass:
                 i = 0
                 j = 1
@@ -104,7 +104,7 @@ while True:
             ball_pair[i].position = (ball_pair[i].position*ball_pair[i].mass+ball_pair[j].position*ball_pair[j].mass)/(ball_pair[i].mass+ball_pair[j].mass)
             ball_pair[j].delete()
 
-            for i, ball_pair in enumerate(ball_pairs):
+            for i, ball_pair in enumerate(ball_pairs): #update list after any collisions
                 if ball_pair[0].deleted == True or ball_pair[1].deleted == True:
                     ball_pairs.pop(i)
             for i, ball in enumerate(balls):
@@ -112,7 +112,7 @@ while True:
                     balls.pop(i)
 
 
-        gravitational_force = (ball_pair[0].mass * ball_pair[1].mass)/(np.power(distance, 2))
+        gravitational_force = (ball_pair[0].mass * ball_pair[1].mass)/(np.power(distance, 2))  #calculate x and y components of gravitational force between all pairs
 
         force_x1 = gravitational_force * (ball_pair[1].position[0][0] - ball_pair[0].position[0][0]) / distance
         force_y1 = gravitational_force * (ball_pair[1].position[0][1] - ball_pair[0].position[0][1]) / distance
@@ -123,7 +123,7 @@ while True:
         ball_pair[1].force[0, 0] += force_x2
         ball_pair[1].force[0, 1] += force_y2
         
-    for ball in balls:
+    for ball in balls:  # update all ball positions, velocities, and accelerations 
         if not ball.deleted:
             if not ball.is_stationary:
                 ball.draw()
