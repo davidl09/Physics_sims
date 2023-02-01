@@ -7,7 +7,9 @@ import random
 #global variables
 screen_width = 1200
 screen_height = 950
+screen_dimensions = np.array([1200, 950])
 
+center_on_cg = True
 density = 100
 last_time = 0
 balls = []
@@ -26,6 +28,8 @@ class Object:
         self.velocity = self.velocity.astype(float)
         self.force = np.array([[0, 0]]).astype(float)
         self.accel = np.array([[0, 0,]]).astype(float)
+        self.radius2 = pow(self.radius, 2)
+        self.radius3 = pow(self.radius, 3)
     
     def draw(self):
         pygame.draw.circle(screen, (0, 0, 0), (self.position[0][0], self.position[0][1]), self.radius)
@@ -38,6 +42,10 @@ class Object:
         self.accel[0, 1] = self.force[0, 1]/self.mass
         self.velocity += self.accel*dt
         self.position += self.velocity*dt
+
+#class Toolbar:
+   # def __init__(self):
+
         
 
 def previous_time():
@@ -49,11 +57,24 @@ def previous_time():
     dt = (times[1] - times[0])
     return dt/1000
 
+def get_cg():
+    total_mass = 0
+    mass_pos = np.array([[0, 0]]).astype(float)
+    for ball in balls:
+        total_mass += ball.mass
+        mass_pos += ball.position*ball.mass
+    return mass_pos/total_mass
+
+def center():
+    correction_factor = (screen_dimensions/2) - get_cg()
+    for ball in balls:
+        ball.position += correction_factor
+
 pygame.init()
 
 time = pygame.time.Clock()
 
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((screen_dimensions[0], screen_dimensions[1]))
 
 last_time = pygame.time.get_ticks()
 
@@ -84,10 +105,12 @@ while True:
     ball_pairs = []
     for i in range(len(balls)):
         for j in range(i+1, len(balls)):
+            if i == j:
+                continue
             ball_pairs.append((balls[i], balls[j]))  #make a list of all possible combinations of balls (Cartesian product)
     for ball_pair in ball_pairs:  #get distance between all pairs
         distance = np.sqrt(np.power(ball_pair[0].position[0][0] - ball_pair[1].position[0][0], 2) + np.power(ball_pair[0].position[0][1] - ball_pair[1].position[0][1], 2)) 
-    
+
         if distance <= ball_pair[0].radius + ball_pair[1].radius:  #handle ball collisions to conserve momentum, mass, volume, etc
             if ball_pair[0].mass > ball_pair[1].mass:
                 i = 0
@@ -97,7 +120,8 @@ while True:
                 i = 1
                 j = 0
             
-            ball_pair[i].radius += pow(ball_pair[j].radius, 1/3)
+            #ball_pair[i].radius += pow(ball_pair[j].radius, 1/3)
+            ball_pair[i].radius = pow(pow(ball_pair[i].radius, 3) + pow(ball_pair[j].radius, 3), 1/3)
             ball_pair[i].velocity = (ball_pair[i].velocity*ball_pair[i].mass+ball_pair[j].velocity*ball_pair[j].mass)/(ball_pair[i].mass + ball_pair[j].mass)
             ball_pair[i].mass += ball_pair[j].mass
             ball_pair[i].density = ball_pair[i].mass/pow(ball_pair[i].radius, 3)
@@ -112,7 +136,10 @@ while True:
                     balls.pop(i)
 
 
-        gravitational_force = (ball_pair[0].mass * ball_pair[1].mass)/(np.power(distance, 2))  #calculate x and y components of gravitational force between all pairs
+        gravitational_force = (ball_pair[0].mass * ball_pair[1].mass)/(pow(distance, 2))  #calculate x and y components of gravitational force between all pairs
+
+        if distance == 0:
+            break
 
         force_x1 = gravitational_force * (ball_pair[1].position[0][0] - ball_pair[0].position[0][0]) / distance
         force_y1 = gravitational_force * (ball_pair[1].position[0][1] - ball_pair[0].position[0][1]) / distance
@@ -122,6 +149,11 @@ while True:
         ball_pair[0].force[0, 1] += force_y1
         ball_pair[1].force[0, 0] += force_x2
         ball_pair[1].force[0, 1] += force_y2
+    
+    cg = get_cg()
+    if center_on_cg == True:
+        center()
+
         
     for ball in balls:  # update all ball positions, velocities, and accelerations 
         if not ball.deleted:
@@ -130,6 +162,4 @@ while True:
                 ball.update()
             else: ball.draw()
         
-        
-    
     pygame.display.update()
