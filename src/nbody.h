@@ -1,18 +1,26 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#define WIDTH 1000
+#define HEIGHT 1000
+#define G 1
 
 typedef struct vector{
     double x;
     double y;
-
 }vector;
 
 typedef struct body{
     vector pos;
     vector vel;
     vector accel;
+    vector force;
     double mass;
     double dens;
 }body;
 
-double mag(vector v);
+double v_mag(vector v);
+vector v_sub(vector v1, vector v2);
+
+vector bpair_force(body b1, body b2);
