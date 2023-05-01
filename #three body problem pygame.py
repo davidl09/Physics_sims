@@ -5,6 +5,7 @@ import numpy as np
 import random
 
 #global variables
+G = 10
 screen_width = 1200
 screen_height = 950
 screen_dimensions = np.array([1200, 950])
@@ -43,10 +44,7 @@ class Object:
         self.velocity += self.accel*dt
         self.position += self.velocity*dt
 
-#class Toolbar:
-   # def __init__(self):
 
-        
 
 def previous_time():
     if len(times) > 1:
@@ -78,7 +76,9 @@ screen = pygame.display.set_mode((screen_dimensions[0], screen_dimensions[1]))
 
 last_time = pygame.time.get_ticks()
 
-#balls.append(Object(15, 1000, np.array([[500, 400]]), np.array([[0, 0]]), True))
+for _ in range(0):
+    balls.append(Object(random.randrange(1, 6), 1000, np.array([[random.randrange(screen_width), random.randrange(screen_height)]]), np.array([[0, 0]]), False))
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -108,6 +108,7 @@ while True:
             if i == j:
                 continue
             ball_pairs.append((balls[i], balls[j]))  #make a list of all possible combinations of balls (Cartesian product)
+
     for ball_pair in ball_pairs:  #get distance between all pairs
         distance = np.sqrt(np.power(ball_pair[0].position[0][0] - ball_pair[1].position[0][0], 2) + np.power(ball_pair[0].position[0][1] - ball_pair[1].position[0][1], 2)) 
 
@@ -136,7 +137,7 @@ while True:
                     balls.pop(i)
 
 
-        gravitational_force = (ball_pair[0].mass * ball_pair[1].mass)/(pow(distance, 2))  #calculate x and y components of gravitational force between all pairs
+        gravitational_force = (G * ball_pair[0].mass * ball_pair[1].mass)/(pow(distance, 3))  #calculate x and y components of gravitational force between all pairs
 
         if distance == 0:
             break

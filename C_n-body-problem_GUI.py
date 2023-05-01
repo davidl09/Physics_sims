@@ -3,7 +3,7 @@ import numpy as np
 
 pygame.init()
 
-file = open('C:/Users/dalae/CLionProjects/gui_physics_sim_backup/cmake-build-debug/sim_data.txt')
+file = open('sim_data.txt')
 
 header = file.readline().split(",")
 dt = float(header[0])
