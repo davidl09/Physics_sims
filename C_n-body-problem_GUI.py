@@ -1,6 +1,4 @@
 import pygame
-import numpy as np
-from ctypes import *
 
 pygame.init()
 

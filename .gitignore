@@ -7,3 +7,4 @@ CMakeFiles/
 Makefile
 PHYSICS_SIM
 venv/
+__pycache__/
