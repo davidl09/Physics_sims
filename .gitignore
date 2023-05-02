@@ -1,6 +1,5 @@
 .vscode/
 build/
-example.txt
 *.cmake
 *.txt
 CMakeFiles/
