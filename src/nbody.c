@@ -29,3 +29,20 @@ vector bpair_force(body b1, body b2)
     return (vector){scalar * r.x, scalar * r.y};
 }
 
+void calculate_step(body* bodies, double dt, unsigned int count){
+    vector force;
+    for (int i = 0; i < count; ++i) {
+        for (int j = i + 1; j < count; ++j) {
+            force = bpair_force(bodies[i], bodies[j]);
+            bodies[i].force = v_add(bodies[i].force, force);
+            bodies[j].force = v_sub(bodies[j].force, force);
+        }
+    }
+
+    for (int i = 0; i < count; ++i) {
+        bodies[i].accel = v_sprod(bodies[i].force, bodies[i].mass);
+        bodies[i].vel = v_add(v_sprod(bodies[i].accel, dt), bodies[i].vel);
+        bodies[i].pos = v_add(v_sprod(bodies[i].vel, dt), bodies[i].pos);
+    }
+    return;
+}

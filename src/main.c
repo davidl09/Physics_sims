@@ -18,7 +18,7 @@ int main(void){
 
     vector force;
     for (int i = 0; i < numbodies; ++i) {
-        for (int j = i; j < numbodies; ++j) {
+        for (int j = i + 1; j < numbodies; ++j) {
             force = bpair_force(bodies[i], bodies[j]);
             bodies[i].force = v_add(bodies[i].force, force);
             bodies[j].force = v_sub(bodies[j].force, force);

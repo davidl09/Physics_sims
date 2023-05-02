@@ -28,3 +28,5 @@ vector v_sprod(vector v, double scalar);
 vector v_unit(vector v);
 
 vector bpair_force(body b1, body b2);
+
+void calculate_step(body* array, double dt, unsigned int count);
