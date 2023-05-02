@@ -28,3 +28,4 @@ vector bpair_force(body b1, body b2)
     double scalar = -G * b1.mass * b2.mass / pow(v_mag(v_sub(b1.pos, b2.pos)), 2);
     return (vector){scalar * r.x, scalar * r.y};
 }
+
