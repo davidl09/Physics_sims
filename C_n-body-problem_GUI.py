@@ -1,15 +1,11 @@
 import pygame
 import numpy as np
+from ctypes import *
 
 pygame.init()
 
 file = open('sim_data.txt')
-
-header = file.readline().split(",")
-dt = float(header[0])
-total_t = int(header[1])
-SCREEN_WIDTH = int(header[2])
-SCREEN_HEIGHT = int(header[3])
+SCREEN_WIDTH = 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
