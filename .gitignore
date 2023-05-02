@@ -1,2 +1,10 @@
 .vscode/
 build/
+*.cmake
+*.txt
+CMakeFiles/
+.cache/
+Makefile
+PHYSICS_SIM
+
+
