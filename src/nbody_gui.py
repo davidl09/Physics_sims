@@ -6,11 +6,11 @@ import math
 import pathlib
 import random
 
-MAX_COUNT = int(10)
+MAX_COUNT = int(1000)
 WIDTH = 1000
 HEIGHT = 1000
-DT = 1/120
-G = 10
+DT = 1/512
+G = 1
 WHITE = (255, 255, 255)
 GREY = (30, 30, 30)
 ROTATION = 1
@@ -35,7 +35,11 @@ calculate_step.restype = None
 
 array = (Body * MAX_COUNT)()
 
-fill_arr(array, c_double(ROTATION/50), 1000, 1, c_uint(MAX_COUNT))
+fill_arr(array, c_double(ROTATION/50), 500, 5, c_uint(MAX_COUNT))
+
+for body in array:
+    body.pos.x /= 2
+    body.pos.y /=2
 
 pygame.init()
 
@@ -53,7 +57,8 @@ while True:
     screen.fill(WHITE)
 
     for body in array:
-        pygame.draw.circle(screen, GREY, (body.pos.x + WIDTH/2, -body.pos.y + WIDTH/2), math.pow(body.mass/body.dens, 1/3))
+        if -WIDTH/2 - 50 <= body.pos.x <= WIDTH/2 + 50 and -HEIGHT/2 - 50 <= body.pos.y <= HEIGHT/2 + 50:
+            pygame.draw.circle(screen, (GREY), (body.pos.x + WIDTH/2, -body.pos.y + WIDTH/2), math.pow(body.mass/body.dens, 1/3))
 
     pygame.display.update()
 
