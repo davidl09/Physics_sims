@@ -9,7 +9,7 @@ import random
 MAX_COUNT = int(1000)
 WIDTH = 1000
 HEIGHT = 1000
-DT = 1/512
+DT = 1/120
 G = 1
 WHITE = (255, 255, 255)
 GREY = (30, 30, 30)
@@ -29,7 +29,7 @@ fill_arr = lib.fill_arr
 fill_arr.argtypes = [POINTER(Body), c_double, c_uint, c_uint, c_uint]
 fill_arr.restype = None
 
-calculate_step = lib.calculate_step
+calculate_step = lib.calculate_step_mt
 calculate_step.argtypes = [POINTER(Body), c_double, c_uint, c_double]
 calculate_step.restype = None
 
@@ -37,10 +37,12 @@ array = (Body * MAX_COUNT)()
 
 fill_arr(array, c_double(ROTATION/50), 500, 5, c_uint(MAX_COUNT))
 
+"""
 for body in array:
     body.pos.x /= 2
     body.pos.y /=2
-
+"""
+    
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))

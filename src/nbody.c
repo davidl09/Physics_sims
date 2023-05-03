@@ -1,7 +1,4 @@
 #include "nbody.h"
-#include <math.h>
-#include <pthread.h>
-#include <stdlib.h>
 
 double G;
 
@@ -86,24 +83,22 @@ int classify(vector pos){ //classifiy points into quadrants
 
 void calculate_step_mt(body* bodies, double dt, unsigned int count, double G_const){
     pthread_t threads[4];
-    args arg[4];
+    args* arg = malloc(4 * sizeof(args));
     int quadrant;
-    body** sections = calloc(4,sizeof(body*));
     vector c_g_q[4] = {V_0, V_0, V_0, V_0};
     double masses[4] = {0, 0, 0, 0};
+    body sections[4][count];
 
     for (int i = 0; i < 4; ++i) {
-        sections[i] = calloc(1, sizeof(body));
         arg[i].count = 0;
     }
 
     for (int i = 0; i < count; ++i) { //allocate memory and compute r^_cm * M for each quadrant
         quadrant = classify(bodies[i].pos);
+        arg[quadrant].count++;
         sections[quadrant][arg[quadrant].count] = bodies[i];
         c_g_q[quadrant] = v_add(c_g_q[quadrant], v_sprod(bodies[i].pos, bodies[i].mass));
         masses[quadrant] += bodies[i].mass;
-        arg[quadrant].count++;
-        sections[quadrant] = realloc(sections[quadrant], arg[quadrant].count * sizeof(body));
     }
 
     for (int i = 0; i < 4; ++i) {
@@ -111,10 +106,14 @@ void calculate_step_mt(body* bodies, double dt, unsigned int count, double G_con
     }
 
 
+double temp;
+vector temp_v;
     for (int i = 0; i < 4; ++i) { //start a thread for each quadrant
         for (int j = 0; j < 4; ++j) {
-            arg[i].cg[j] = c_g_q[j];
-            arg[i].cg_mass[j] = masses[j];
+            temp_v = c_g_q[j];
+            arg[i].cg[j] = temp_v;
+            temp = masses[j];
+            arg[i].cg_mass[j] = temp;
         }
         arg[i].dt = dt;
         arg[i].G_const = G_const;
@@ -125,22 +124,23 @@ void calculate_step_mt(body* bodies, double dt, unsigned int count, double G_con
         pthread_join(threads[i], NULL);
     }
 
+    free(arg);
+    return;
 }
 
 void* mt_calc(void* arg_struct){
     args* arg = (args*)arg_struct;
-    vector force;
     double radius;
 
     for (int i = 0; i < arg->count; ++i) {
         arg->bodies[i].force = V_0;
     }
 
-    for (int i = 0; i < (arg->count - 1); ++i) {
+    for (int i = 0; i < (arg->count); ++i) {
         if(arg->bodies[i].mass != 0){
             for (int j = 0; j < arg->count; ++j) {
                 if(j == i) continue;
-                
+
                 if(arg->bodies[j].mass != 0){
                     radius = cbrt(arg->bodies[i].mass/arg->bodies[i].dens);
                     if(v_mag(v_sub(arg->bodies[i].pos, arg->bodies[j].pos)) < radius){
@@ -163,9 +163,9 @@ void* mt_calc(void* arg_struct){
                             }
                             cg_temp.pos = v_sprod(cg_temp.pos, 1/cg_temp.mass);
                         }
-                        force = v_add(bpair_force(arg->bodies[i], arg->bodies[j]), bpair_force(arg->bodies[i], cg_temp));
-                        arg->bodies[i].force = v_add(arg->bodies[i].force, force);
-                        arg->bodies[j].force = v_sub(arg->bodies[j].force, force);
+
+                        arg->bodies[i].force = v_add(arg->bodies[i].force, 
+                        v_add(bpair_force(arg->bodies[i], arg->bodies[j]), bpair_force(arg->bodies[i], cg_temp)));
                     }
                 }
             }
